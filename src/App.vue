@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import header1 from './views/header_footer/header.vue';
-import footer1 from './views/header_footer/footer.vue';
-import data1 from './views/data.vue';
+import { RouterView } from 'vue-router'
+import headerVue from './views/header_footer/header.vue'
+import footerVue from './views/header_footer/footer.vue'
 </script>
 
 <template>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <header1/>
-  <body>
-    <data1/>
-  </body>
-  <footer1></footer1>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  
+  <headerVue/>
+  <div class="container">
+    <router-view />
+  </div>
+  <footerVue/>
 </template>
 
 <style scoped>
