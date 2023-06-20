@@ -9,6 +9,7 @@ import footerVue from './views/header_footer/footer.vue'
   
   <headerVue/>
   <div class="container">
+    <router-view name="headerLogInDone"/>
     <router-view />
   </div>
   <footerVue/>

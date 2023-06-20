@@ -1,35 +1,35 @@
 <template>
-    <router-view name="headerVue1"/>
-    <div class="container">
-      
-        <h1>add</h1>
-        <table>
-            <th>
-                <td>
-                    1
-                </td>
-            </th>
-            <th>
-                <td>
-                    2
-                </td>
-            </th>
-           
-        </table>
-    </div>
-    <router-view name="footerVue1"/>
+  <div class="container">
+    <form>
+        <div class="columns">
+            <div class="column is-four-fifths">
+                <input class="input is-primary" type="text" placeholder="Link">    
+             </div>
+            <div class="column">
+                <input class="input is-primary" type="text" placeholder="Title">
+            </div>
+          </div>
+          
+          <div class="columns">
+            <div class="column is-two-thirds">
+                <input class="input is-primary" type="text" placeholder="describe">
+            </div>
+            <div class="column auto">
+                <Router-link :to="{path: '/'}">
+                    <button class="button is-success" > Add </button>
+                </Router-link>
+            </div>
+          </div>
+    </form>
+  </div>
 </template>
 
-<script  lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts">
+import { defineComponent } from 'vue'
 
 export default defineComponent({
-    components: {
-        
-    }
+  components: {}
 })
 </script>
 
-<style>
-
-</style>
+<style></style>
