@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import headerVue from './views/header_footer/header.vue'
 import footerVue from './views/header_footer/footer.vue'
+import 'bulma/css/bulma.css';
 </script>
 
 <template>
@@ -9,7 +10,6 @@ import footerVue from './views/header_footer/footer.vue'
   
   <headerVue/>
   <div class="container">
-    <router-view name="headerLogInDone"/>
     <router-view />
   </div>
   <footerVue/>

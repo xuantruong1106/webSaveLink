@@ -1,24 +1,57 @@
-<!-- <template>
-  <div class="formLogIn">
-    <form  @click.prevent="handleSubmit()">
+<template>
+  <!-- <div class="formLogIn">
+    <form @submit.prevent="handleSubmit">
       <div class="field has-addons">
         <div class="control">
           <input class="input" type="text" placeholder="Email" v-model="email" />
-        </div>
-        <div class="control">
-          <a class="button is-info"> logIn </a>
+          <input class="input" type="password" placeholder="PassWord" v-model="password" />
+          <button type="submit" class="button is-info">Log In</button>
         </div>
       </div>
     </form>
     <br />
     <div>
-      <Router-link to="/signIn" id="is-success" class="button is-success"> Sign in </Router-link>
-      <button @click="signInWithGoogle()" class="btn1 button is-link" id="is-link">
-        Sign in google
+      <button @click="signInWithGoogle" class="btn1 button is-link" id="is-link">
+        Log in with Google
       </button>
     </div>
+  </div> -->
+  <div class="column is-6-desktop is-offset-one-fifth">
+    <form @submit.prevent="handleSubmit" class="box is-centered">
+      <div class="field column is-half">
+        <label for="" class="label">Email</label>
+        <div class="control has-icons-right">
+          <input type="email" placeholder="e.g. bobsmith@gmail.com" class="input" v-model="email" required>
+          <span class="icon is-small is-left">
+            <i class="fa fa-envelope"></i>
+          </span>
+        </div>
+      </div>
+      <div class="field column is-half">
+        <label for="" class="label">Password</label>
+        <div class="control has-icons-left">
+          <input type="password" placeholder="*******" class="input" v-model="password" required>
+          <span class="icon is-small is-left">
+            <i class="fa fa-lock"></i>
+          </span>
+        </div>
+      </div>
+      <div class="field column is-half is-half-tablet is-half-desktop">
+        <label for="" class="checkbox">
+          <input type="checkbox">
+         Remember me
+        </label>
+      </div>
+      <div class="field column is-half is-half-tablet is-half-desktop">
+        <button class="button is-success" style="margin-right: 20px">
+          Login
+        </button>
+        <button class="button is-link is-half-tablet is-half-desktop"  @click="signInWithGoogle">
+          Login with google
+        </button>
+      </div>
+    </form>
   </div>
-  <br />
 </template>
 
 <script setup lang="ts">
@@ -26,118 +59,19 @@ import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
-  sendSignInLinkToEmail,
   signInWithEmailAndPassword
 } from 'firebase/auth'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Auth1, db } from '../../configs/firebase'
 import { doc, query, where, collection, getDocs } from '@firebase/firestore'
-const email = ref()
-const router = useRouter()
-// onMounted( async () => {
-//   this.user = JSON.parse(localStorage.getItem("user")) || [];
-// })
-function signInWithGoogle() {
-  const provider = new GoogleAuthProvider()
-  const auth = getAuth()
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      const credential = GoogleAuthProvider.credentialFromResult(result)
-      const token = credential.accessToken
-      // The signed-in user info.
-      const user = result.user
-      // IdP data available using getAdditionalUserInfo(result)
-      // ...
-
-      // Lưu thông tin đăng nhập vào localStorage
-      // this.user.push({
-      //   email: this.email,
-      //   pass: '123456'
-      // })
-      // localStorage.setItem('tasks', JSON.stringify(this.user))
-      // this.user = ''
-
-      router.push({
-        path: '/' + user.uid
-      })
-    })
-    .catch((error) => {
-      // Handle Errors here.
-      const errorCode = error.code
-      const errorMessage = error.message
-      // The email of the user's account used.
-      const email = error.customData.email
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(error)
-      // ...
-    })
-}
-
-const handleSubmit = async () => {
-  console.log(email.value)
-  try {
-    const userCredential = await signInWithEmailAndPassword(Auth1, email.value, '123456')
-    const user = userCredential.user
-    console.log('done')
-
-    return router.push({
-      path: '/' + user.uid
-    })
-  } catch (error) {
-    console.error(error)
-    alert('Đăng nhập không thành công')
-  }
-}
-</script>
-
-<style>
-.field {
-  margin-left: 35%;
-}
-#is-success {
-  margin-left: 35%;
-}
-#is-link {
-  margin-left: 5%;
-}
-</style> -->
-
-
-<template>
-  <div class="formLogIn">
-    <!-- <form @submit.prevent="handleSubmit">
-      <div class="field has-addons">
-        <div class="control">
-          <input class="input" type="text" placeholder="Email" v-model="email" />
-        </div>
-        <div class="control">
-          <button type="submit" class="button is-info">Log In</button>
-        </div>
-      </div>
-    </form> -->
-    <br />
-    <div>
-      <!-- <router-link to="/signIn" id="is-success" class="button is-success">Sign in</router-link> -->
-      <button @click="signInWithGoogle" class="btn1 button is-link" id="is-link">
-        Sign in with Google
-      </button>
-    </div>
-  </div>
-  <br />
-</template>
-
-<script setup lang="ts">
-import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth'
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { Auth1, db } from '../../configs/firebase'
-import { doc, query, where, collection, getDocs } from '@firebase/firestore'
 
 const email = ref('')
+const password = ref('')
 const router = useRouter()
-const auth = Auth1;
+const auth = Auth1
+
+//login with google
 function signInWithGoogle() {
   const provider = new GoogleAuthProvider()
   const auth = getAuth()
@@ -158,19 +92,26 @@ function signInWithGoogle() {
     })
 }
 
+//login with email
 async function handleSubmit() {
- 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email.value, '123456')
+    const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value)
     const user = userCredential.user
     console.log('done')
 
     router.push({
       path: '/' + user.uid
     })
+
+    email.value = ''
+    password.value = ''
+
+
   } catch (error) {
     console.error(error)
     alert('Đăng nhập không thành công')
+    email.value = ''
+    password.value = ''
   }
 }
 </script>
@@ -184,5 +125,8 @@ async function handleSubmit() {
 }
 #is-link {
   margin-left: 5%;
+}
+#is-info{
+  margin-left: 500px;
 }
 </style>
