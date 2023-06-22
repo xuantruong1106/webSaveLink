@@ -16,7 +16,7 @@
     <div class="navbar-menu is-flex">
       <div class="navbar-start">
         <a class="navbar-item">
-          <RouterLink :to="{ path: '/' }">Home</RouterLink>
+          <RouterLink :to="{ path: '/'+ uid  }">Home</RouterLink>
         </a>
       </div>
 
@@ -47,6 +47,14 @@
         </div>
       </div>
     </div>
+    <!-- Add email verification notification -->
+    <div v-if="isUserLoggedIn && isEmailVerified == false" class="navbar-end">
+      <div class="navbar-item">
+        <div class="notification is-danger">
+          bạn chưa xác thực email, kiểm tra hộp thư email
+        </div>
+      </div>
+    </div>
   </nav>
 </template>
 <script setup lang="ts">
@@ -57,12 +65,14 @@ import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { collection, query, where, getDocs } from '@firebase/firestore'
+import { userInfo } from 'os'
 
 let name = ref('')
 const route = useRoute().params.uid
 const router = useRouter()
 let isUserLoggedIn = ref(false) // Initialize with false
-
+let isEmailVerified = ref(false); 
+let uid = ''
 // displayname for google
 onAuthStateChanged(Auth1, (user) => {
   if (user) {
@@ -70,15 +80,9 @@ onAuthStateChanged(Auth1, (user) => {
     console.log('Người dùng đã đăng nhập:', user)
     isUserLoggedIn.value = true
     name.value = user.displayName
-
-    // onMounted(async () => {
-    //   const q = query(collection(db, 'info'), where('uid', '==', route))
-    //   const querySnapshotOrder = await getDocs(q)
-    //   querySnapshotOrder.forEach((doc) => {
-    //     name.value = doc.data().fullname
-    //   })
-    //   console.log(name.value)
-    // })
+    isEmailVerified.value = user.emailVerified
+    uid = user.uid
+  
   } else {
     // Người dùng chưa đăng nhập
     console.log('Người dùng chưa đăng nhập')
@@ -89,6 +93,7 @@ onAuthStateChanged(Auth1, (user) => {
     })
   }
 })
+
 
 // logOut
 const handleLogout = () => {
@@ -104,61 +109,3 @@ const handleLogout = () => {
     })
 }
 </script>
-
-<!-- <script setup lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import { Auth1, db } from '@/configs/firebase'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { useRouter } from 'vue-router'
-import { useRoute } from 'vue-router'
-import { collection, query, where, getDocs } from '@firebase/firestore'
-
-let name = ref('')
-const route = useRoute().params.uid
-let uid = ref(Auth1.currentUser).value?.uid
-let isUserLoggedIn = true
-
-//displayname for google
-onAuthStateChanged(Auth1, (user) => {
-  if (user) {
-    // Người dùng đã đăng nhập
-    console.log('Người dùng đã đăng nhập:', user)
-    isUserLoggedIn = true
-    name.value = user.displayName
-
-    onMounted(async () => {
-      const q = query(collection(db, 'info'), where('uid', '==', route))
-      const querySnapshotOrder = await getDocs(q)
-      querySnapshotOrder.forEach((doc) => {
-        name.value = doc.data().fullname
-      })
-      console.log(name.value)
-    })
-  } else {
-    // Người dùng chưa đăng nhập
-    console.log('Người dùng chưa đăng nhập')
-    isUserLoggedIn = false
-    console.log('Người dùng chưa đăng nhập')
-    router.push({
-      path: '/logIn'
-    })
-  }
-})
-
-//lognOut
-const handleLogout = () => {
-  signOut(Auth1)
-    .then(() => {
-      // Logout successful
-      location.reload()
-      console.log('Logout successful')
-    })
-    .catch((error) => {
-      // An error occurred during logout
-      console.error('Logout error:', error)
-    })
-}
-</script>
-
-<style></style> -->

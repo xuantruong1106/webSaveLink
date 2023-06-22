@@ -1,6 +1,7 @@
 <template>
-  <div class="column is-6-desktop is-offset-one-fifth is-half" v-if="isUserLoggedIn">
-    <form @submit.prevent="signIn" class="box is-centered">
+  <div class="column is-6-desktop is-offset-one-fifth is-half">
+    <form @submit.prevent="signIn" class="box is-centered" v-if="isUserLoggedIn == true">
+      <!-- Email field -->
       <div class="field column is-half">
         <label for="" class="label">Email</label>
         <div class="control has-icons-right">
@@ -17,6 +18,7 @@
         </div>
       </div>
 
+      <!-- Fullname field -->
       <div class="field column is-half">
         <label for="" class="label">Họ và tên</label>
         <div class="control has-icons-right">
@@ -27,6 +29,7 @@
         </div>
       </div>
 
+      <!-- Password field -->
       <div class="field column is-half">
         <label for="" class="label">Password</label>
         <div class="control has-icons-left">
@@ -42,9 +45,9 @@
         <button class="button is-link" @click="signInWithGoogle">signIn with google</button>
       </div>
     </form>
-  </div>
-  <div v-if="!isUserLoggedIn">
-    <h1>đã đăng nhập</h1>
+    <div v-else>
+      <h1>đã đăng nhập</h1>
+    </div>
   </div>
 </template>
 
@@ -54,18 +57,37 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   updateProfile,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  sendEmailVerification
 } from 'firebase/auth'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Auth1, db } from '../../configs/firebase'
 import { doc, collection, setDoc, addDoc } from '@firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
+
 const email = ref()
 const fullname = ref()
 const password = ref()
 const router = useRouter()
 const auth = Auth1
+
+// check LogIn
+let isUserLoggedIn = false
+onAuthStateChanged(Auth1, (user) => {
+  if (user) {
+    // Người dùng đã đăng nhập
+    isUserLoggedIn = true
+  } else {
+    // Người dùng chưa đăng nhập
+    isUserLoggedIn = false
+    console.log('Người dùng chưa đăng nhập')
+  }
+})
+
+console.log(isUserLoggedIn)
 
 // sign with google
 function signInWithGoogle() {
@@ -87,7 +109,7 @@ function signInWithGoogle() {
     })
 }
 
-//signIn with email
+// signIn with email
 const signIn = async () => {
   await createUserWithEmailAndPassword(auth, email.value, password.value)
     .then((userCredential) => {
@@ -116,9 +138,47 @@ const signIn = async () => {
           updateDisplayName(fullname.value)
         }
 
-        return router.push({
-          path: '/' + user.uid
-        })
+        // Send email verification
+        sendEmailVerification(user)
+          .then(() => {
+            console.log('Email verification sent')
+            return router.push({
+                path: '/' + user.uid
+              })
+          })
+          .catch((error) => {
+            console.error('Error sending email verification:', error)
+          })
+
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+          // Additional state parameters can also be passed via URL.
+          // This can be used to continue the user's intended action before triggering
+          // the sign-in operation.
+          // Get the email if available. This should be available if the user completes
+          // the flow on the same device where they started it.
+          let email = window.localStorage.getItem('emailForSignIn')
+          if (!email) {
+            // User opened the link on a different device. To prevent session fixation
+            // attacks, ask the user to provide the associated email again. For example:
+            email = window.prompt('Please provide your email for confirmation')
+          }
+          // The client SDK will parse the code from the link for you.
+          signInWithEmailLink(auth, email, window.location.href)
+            .then((result) => {
+              // Clear email from storage.
+              window.localStorage.removeItem('emailForSignIn')
+             
+              // You can access the new user via result.user
+              // Additional user info profile not available via:
+              // result.additionalUserInfo.profile == null
+              // You can check if the user is new or existing:
+              // result.additionalUserInfo.isNewUser
+            })
+            .catch((error) => {
+              // Some error occurred, you can inspect the code: error.code
+              // Common errors could be invalid email and invalid or expired OTPs.
+            })
+        }
       } else {
         console.error('Full name is undefined')
       }
@@ -126,22 +186,11 @@ const signIn = async () => {
     .catch((error) => {
       const errorCode = error.code
       const errorMessage = error.message
-      // ..`
+      // ..
     })
 }
 
-//check LogIn
-let isUserLoggedIn = false
-onAuthStateChanged(Auth1, (user) => {
-  if (user) {
-    // Người dùng đã đăng nhập
-    isUserLoggedIn = true
-  } else {
-    // Người dùng chưa đăng nhập
-    isUserLoggedIn = true
-    console.log('Người dùng chưa đăng nhập')
-  }
-})
+
 </script>
 
 <style>
@@ -155,15 +204,3 @@ onAuthStateChanged(Auth1, (user) => {
   margin-left: 5%;
 }
 </style>
-// // sign in with email // async function signIn() { // await createUserWithEmailAndPassword(Auth1,
-email.value, password.value) // .then((userCredential) => { // // Signed in // const user =
-userCredential.user // // // Save fullname in Firebase profile // // updateProfile(user, {
-displayName: fullname.value }) // // .then(() => { // // console.log('Full name saved to Firebase
-profile') // // }) // // .catch((error) => { // // console.error('Error saving full name to Firebase
-profile:', error) // // }) // // //sự kiện cofirm // // var result2 = confirm('signIn successfull')
-// // if (result2) { // // // Xử lý logic sau khi người dùng nhấn OK // // router.push('/' +
-user.uid ) // // // Thêm các lệnh xử lý khác tại đây // // } else { // // // Xử lý logic khi người
-dùng nhấn Cancel // // router.push('/' + user.uid) // // // Thêm các lệnh xử lý khác tại đây // // }
-// // }) // // .catch((error) => { // // const errorCode = error.code // // const errorMessage =
-error.message // // // .. // return router.push({name: 'home'}) // }) // .catch((error) => { //
-const errorCode = error.code // const errorMessage = error.message // }) // }

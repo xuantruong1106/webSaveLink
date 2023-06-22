@@ -137,15 +137,15 @@ onMounted(async () => {
   })
   const arrData1 = arrData.slice().reverse()
   showDataDetail.value = arrData1
-  console.log(showDataDetail)
+ 
 
   onAuthStateChanged(Auth1, (user) => {
     if (user) {
       // Người dùng đã đăng nhập
-      console.log('Người dùng đã đăng nhập:', user)
+     
     } else {
       // Người dùng chưa đăng nhập
-      console.log('Người dùng chưa đăng nhập')
+     
       router.push({
         path: '/logIn'
       })

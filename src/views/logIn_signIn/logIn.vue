@@ -1,23 +1,7 @@
 <template>
-  <!-- <div class="formLogIn">
-    <form @submit.prevent="handleSubmit">
-      <div class="field has-addons">
-        <div class="control">
-          <input class="input" type="text" placeholder="Email" v-model="email" />
-          <input class="input" type="password" placeholder="PassWord" v-model="password" />
-          <button type="submit" class="button is-info">Log In</button>
-        </div>
-      </div>
-    </form>
-    <br />
-    <div>
-      <button @click="signInWithGoogle" class="btn1 button is-link" id="is-link">
-        Log in with Google
-      </button>
-    </div>
-  </div> -->
   <div class="column is-6-desktop is-offset-one-fifth">
     <form @submit.prevent="handleSubmit" class="box is-centered">
+      <!-- Email field -->
       <div class="field column is-half">
         <label for="" class="label">Email</label>
         <div class="control has-icons-right">
@@ -27,6 +11,8 @@
           </span>
         </div>
       </div>
+
+      <!-- Password field -->
       <div class="field column is-half">
         <label for="" class="label">Password</label>
         <div class="control has-icons-left">
@@ -36,18 +22,22 @@
           </span>
         </div>
       </div>
+
+      <!-- Remember me checkbox -->
       <div class="field column is-half is-half-tablet is-half-desktop">
         <label for="" class="checkbox">
-          <input type="checkbox">
-         Remember me
+          <input type="checkbox" v-model="rememberMe">
+          Remember me
         </label>
       </div>
+
+      <!-- Submit buttons -->
       <div class="field column is-half is-half-tablet is-half-desktop">
         <button class="button is-success" style="margin-right: 20px">
           Login
         </button>
-        <button class="button is-link is-half-tablet is-half-desktop"  @click="signInWithGoogle">
-          Login with google
+        <button class="button is-link is-half-tablet is-half-desktop" @click="signInWithGoogle">
+          Login with Google
         </button>
       </div>
     </form>
@@ -59,7 +49,7 @@ import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
 } from 'firebase/auth'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -70,8 +60,27 @@ const email = ref('')
 const password = ref('')
 const router = useRouter()
 const auth = Auth1
+const rememberMe = ref(false)
+const emailVerified = ref(false)
 
-//login with google
+// Load email from storage if rememberMe is enabled
+onMounted(() => {
+  const storedEmail = localStorage.getItem('rememberedEmail')
+  if (storedEmail && rememberMe.value) {
+    email.value = storedEmail
+  }
+})
+
+// Save email to storage if rememberMe is enabled
+function saveEmailToStorage() {
+  if (rememberMe.value) {
+    localStorage.setItem('rememberedEmail', email.value)
+  } else {
+    localStorage.removeItem('rememberedEmail')
+  }
+}
+
+// Login with Google
 function signInWithGoogle() {
   const provider = new GoogleAuthProvider()
   const auth = getAuth()
@@ -92,7 +101,7 @@ function signInWithGoogle() {
     })
 }
 
-//login with email
+// Login with email and password
 async function handleSubmit() {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value)
@@ -105,8 +114,9 @@ async function handleSubmit() {
 
     email.value = ''
     password.value = ''
+    saveEmailToStorage() // Save email if rememberMe is enabled
 
-
+    emailVerified.value = user.emailVerified // Check if email is verified
   } catch (error) {
     console.error(error)
     alert('Đăng nhập không thành công')
@@ -126,7 +136,10 @@ async function handleSubmit() {
 #is-link {
   margin-left: 5%;
 }
-#is-info{
-  margin-left: 500px;
+#is-info {
+  margin-left: 35%;
+}
+#is-warning {
+  margin-left: 35%;
 }
 </style>
