@@ -4,7 +4,7 @@
       <a class="navbar-item" href="http://xtruongweb.ihostfull.com/">
         <div class="container">
           <img
-            src="public\links-low-resolution-logo-color-on-transparent-background.svg"
+            src="https://drive.google.com/uc?id=1zPF32FxuxMrlsvutyWSieLk3c1T0mk2P"
             width="112"
             height="28"
             class="is-fullwidth"
@@ -77,7 +77,6 @@ let uid = ''
 onAuthStateChanged(Auth1, (user) => {
   if (user) {
     // Người dùng đã đăng nhập
-    console.log('Người dùng đã đăng nhập:', user)
     isUserLoggedIn.value = true
     name.value = user.displayName
     isEmailVerified.value = user.emailVerified

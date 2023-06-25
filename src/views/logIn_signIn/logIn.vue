@@ -5,7 +5,13 @@
       <div class="field column is-half">
         <label for="" class="label">Email</label>
         <div class="control has-icons-right">
-          <input type="email" placeholder="e.g. bobsmith@gmail.com" class="input" v-model="email" required>
+          <input
+            type="email"
+            placeholder="e.g. bobsmith@gmail.com"
+            class="input"
+            v-model="email"
+            required
+          />
           <span class="icon is-small is-left">
             <i class="fa fa-envelope"></i>
           </span>
@@ -16,7 +22,7 @@
       <div class="field column is-half">
         <label for="" class="label">Password</label>
         <div class="control has-icons-left">
-          <input type="password" placeholder="*******" class="input" v-model="password" required>
+          <input type="password" placeholder="*******" class="input" v-model="password" required />
           <span class="icon is-small is-left">
             <i class="fa fa-lock"></i>
           </span>
@@ -26,16 +32,14 @@
       <!-- Remember me checkbox -->
       <div class="field column is-half is-half-tablet is-half-desktop">
         <label for="" class="checkbox">
-          <input type="checkbox" v-model="rememberMe">
+          <input type="checkbox" v-model="rememberMe" />
           Remember me
         </label>
       </div>
 
       <!-- Submit buttons -->
       <div class="field column is-half is-half-tablet is-half-desktop">
-        <button class="button is-success" style="margin-right: 20px">
-          Login
-        </button>
+        <button class="button is-success" style="margin-right: 20px">Login</button>
         <button class="button is-link is-half-tablet is-half-desktop" @click="signInWithGoogle">
           Login with Google
         </button>
@@ -50,9 +54,10 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
+  onAuthStateChanged
 } from 'firebase/auth'
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Auth1, db } from '../../configs/firebase'
 import { doc, query, where, collection, getDocs } from '@firebase/firestore'
 
@@ -62,6 +67,18 @@ const router = useRouter()
 const auth = Auth1
 const rememberMe = ref(false)
 const emailVerified = ref(false)
+
+onAuthStateChanged(Auth1, (user) => {
+  if (user) {
+    // Người dùng đã đăng nhập
+
+    router.push({
+      path: '/' + user.uid
+    })
+
+    console.log(user.uid)
+  }
+})
 
 // Load email from storage if rememberMe is enabled
 onMounted(() => {

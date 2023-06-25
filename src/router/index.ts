@@ -7,11 +7,11 @@ import addData from '../views/function/addData.vue'
 import updateData from '@/views/function/updateData.vue'
 import loginVue from '@/views/logIn_signIn/logIn.vue'
 import signInVue from '@/views/logIn_signIn/signIn.vue'
-import headerLogInDoneVue from '@/views/header_footer/headerLogInDone.vue'
 import showData from '@/views/function/showData.vue'
 import test1 from '../views/function/test.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  
   routes: [
     {
       path: '/:uid',
@@ -30,22 +30,17 @@ const router = createRouter({
       component: signInVue
     },
     {
-      path: '/test1',
-      name: 'test1',
-      component: test1
-    },
-    {
       path: '/user/',
       name: 'user/',
       component: user,
       children: [
         {
-          path: 'add',
+          path: 'add/:uid',
           name: 'add',
           component: addData
         },
         {
-          path: 'update/:uid',
+          path: 'update/:uid/:idLink',
           name: 'update',
           component: updateData
         }
