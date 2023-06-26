@@ -1,14 +1,13 @@
 import { vue } from "@vitejs/plugin-vue";
 import { createRouter, createWebHistory } from 'vue-router'
-import headerVue from '@/views/header_footer/header.vue'
-import footerVue from '@/views/header_footer/footer.vue'
 import user from '../views/user.vue'
 import addData from '../views/function/addData.vue'
+import addDataDontPassword from '../views/function/addDataDontPassword.vue'
 import updateData from '@/views/function/updateData.vue'
 import loginVue from '@/views/logIn_signIn/logIn.vue'
 import signInVue from '@/views/logIn_signIn/signIn.vue'
 import showData from '@/views/function/showData.vue'
-import test1 from '../views/function/test.vue'
+import  userInfo  from '@/views/function/userInfo.vue';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   
@@ -40,9 +39,19 @@ const router = createRouter({
           component: addData
         },
         {
+          path: 'add-link-one-way-password-required/:uid',
+          name: 'add-link-one-way-password-required',
+          component: addDataDontPassword
+        },
+        {
           path: 'update/:uid/:idLink',
           name: 'update',
           component: updateData
+        },
+        {
+          path: 'userInfo/:uid',
+          name: 'userInfo',
+          component: userInfo
         }
       ]
     }

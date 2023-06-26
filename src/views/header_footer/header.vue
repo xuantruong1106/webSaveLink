@@ -16,17 +16,17 @@
     <div class="navbar-menu is-flex">
       <div class="navbar-start">
         <a class="navbar-item">
-          <RouterLink :to="{ path: '/'+ uid  }">Home</RouterLink>
+          <RouterLink :to="{ path: '/' + uid }">Home</RouterLink>
         </a>
       </div>
 
       <div class="navbar-item">
         <div class="navbar-end" v-if="isUserLoggedIn">
           <div class="buttons">
-            <a class="button is-primary is-flex">
-              <strong>{{ name }} </strong>
-            </a>
-            <button class="button is-light" @click.prevent="handleLogout()">LogOut</button>
+            <router-link :to="{ path: '/user/userInfo/' + uid }" class="button is-primary is-size-5" >
+              {{ name }}
+            </router-link>
+            <button class="button is-light is-size-5" @click.prevent="handleLogout()">Logout</button>
           </div>
         </div>
       </div>
@@ -50,9 +50,7 @@
     <!-- Add email verification notification -->
     <div v-if="isUserLoggedIn && isEmailVerified == false" class="navbar-end">
       <div class="navbar-item">
-        <div class="notification is-danger">
-          bạn chưa xác thực email, kiểm tra hộp thư email
-        </div>
+        <div class="notification is-danger">bạn chưa xác thực email, kiểm tra hộp thư email</div>
       </div>
     </div>
   </nav>
@@ -71,7 +69,7 @@ let name = ref('')
 const route = useRoute().params.uid
 const router = useRouter()
 let isUserLoggedIn = ref(false) // Initialize with false
-let isEmailVerified = ref(false); 
+let isEmailVerified = ref(false)
 let uid = ''
 // displayname for google
 onAuthStateChanged(Auth1, (user) => {
@@ -81,7 +79,6 @@ onAuthStateChanged(Auth1, (user) => {
     name.value = user.displayName
     isEmailVerified.value = user.emailVerified
     uid = user.uid
-  
   } else {
     // Người dùng chưa đăng nhập
     console.log('Người dùng chưa đăng nhập')
@@ -92,7 +89,6 @@ onAuthStateChanged(Auth1, (user) => {
     })
   }
 })
-
 
 // logOut
 const handleLogout = () => {

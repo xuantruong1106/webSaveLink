@@ -4,6 +4,11 @@
       <button class="button">
         <Router-link :to="{ path: '/user/add/' + uid }"> Add new link </Router-link>
       </button>
+      <button id="add-link-one-way-password-required" class="button">
+        <Router-link :to="{ path: '/user/add-link-one-way-password-required/' + uid }"> 
+          Add new link one way password required
+        </Router-link>
+      </button>
     </div>
   </div>
   <div class="table-container">
@@ -214,6 +219,9 @@ tr {
   flex-wrap: wrap;
 }
 
+#add-link-one-way-password-required{
+  margin-left: -39%;
+}
 small {
   white-space: nowrap;
   overflow: hidden;
