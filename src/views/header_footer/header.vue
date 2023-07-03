@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { defineComponent, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { Auth1, db } from '@/configs/firebase'
+import { Auth1} from '@/configs/firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
@@ -66,8 +66,6 @@ import { collection, query, where, getDocs } from '@firebase/firestore'
 import { userInfo } from 'os'
 
 let name = ref('')
-const route = useRoute().params.uid
-const router = useRouter()
 let isUserLoggedIn = ref(false) // Initialize with false
 let isEmailVerified = ref(false)
 let uid = ''
@@ -84,9 +82,7 @@ onAuthStateChanged(Auth1, (user) => {
     console.log('Người dùng chưa đăng nhập')
     isUserLoggedIn.value = false
     console.log('Người dùng chưa đăng nhập')
-    router.push({
-      path: '/logIn'
-    })
+    
   }
 })
 

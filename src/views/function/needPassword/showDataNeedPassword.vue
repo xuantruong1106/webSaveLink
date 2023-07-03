@@ -1,14 +1,13 @@
 <template>
-  <div class="column is-mobile">
-    <div class="column is-11 is-offset-11">
+  <div class="columns is-mobile">
+    <h1 class="column is-4 title is-2 is-warning is-light button" > LINK NEED PASSWORD</h1>
+    <div id="btn" class="column is-4" v-if="emailVerified == true">
       <button class="button">
-        <Router-link :to="{ path: '/user/add/' + uid }"> Add new link </Router-link>
+        <Router-link :to="{ path: '/user/add/needPassword/' + uid }"> Add new link </Router-link>
       </button>
-      <button id="add-link-one-way-password-required" class="button">
-        <Router-link :to="{ path: '/user/add-link-one-way-password-required/' + uid }"> 
-          Add new link one way password required
-        </Router-link>
-      </button>
+    </div>
+    <div class="column is-offset-11" v-if="emailVerified == false">
+      <p>Vui lòng xác nhận email để dùng được các tính năng của trang web</p>
     </div>
   </div>
   <div class="table-container">
@@ -80,7 +79,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { db, Auth1 } from '../../configs/firebase'
+import { db, Auth1 } from '../../../configs/firebase'
 import { collection, query, where, getDocs, doc, deleteDoc } from '@firebase/firestore'
 import { useRoute, useRouter } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -89,7 +88,8 @@ let showDataDetail = ref([])
 const routeVue = useRoute()
 const uid = routeVue.params.uid
 const routerVue = useRouter()
-
+const emailVerified = ref(false)
+console.log(emailVerified)
 onMounted(async () => {
   let arrData = []
   let dataEnd = {}
@@ -101,6 +101,7 @@ onMounted(async () => {
     if (user) {
       if (user.uid == uid) {
         // Người dùng đã đăng nhập
+        emailVerified.value = Auth1.currentUser?.emailVerified
         querySnap.forEach((doc) => {
           const Data = {
             id: doc.id,
@@ -191,10 +192,12 @@ const deleteLink = async (id) => {
   location.reload()
 }
 
-const updateLink = async (id) => {}
 </script>
 
 <style>
+#btn{
+  margin-left: 50%;
+}
 a {
   text-decoration: none;
 }

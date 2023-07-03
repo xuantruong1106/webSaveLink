@@ -35,6 +35,9 @@
           <input type="checkbox" v-model="rememberMe" />
           Remember me
         </label>
+        <router-link :to="{path: '/forgotPassword'}" id="forgotPassword">
+          forgot password
+        </router-link>
       </div>
 
       <!-- Submit buttons -->
@@ -158,5 +161,9 @@ async function handleSubmit() {
 }
 #is-warning {
   margin-left: 35%;
+}
+
+#forgotPassword{
+  margin-left: 5%;
 }
 </style>

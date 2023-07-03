@@ -1,6 +1,6 @@
 <template>
   <div class="column is-6-desktop is-offset-one-fifth is-half">
-    <form @submit.prevent="signIn" class="box is-centered" v-if="isUserLoggedIn == true">
+    <form @submit.prevent="signIn" class="box is-centered" v-if="isUserLoggedIn == false">
       <!-- Email field -->
       <div class="field column is-half">
         <label for="" class="label">Email</label>
@@ -45,7 +45,7 @@
         <button class="button is-link" @click="signInWithGoogle">signIn with google</button>
       </div>
     </form>
-    <div v-else>
+    <div v-if="isUserLoggedIn == true">
       <h1>đã đăng nhập</h1>
     </div>
   </div>
@@ -60,34 +60,35 @@ import {
   createUserWithEmailAndPassword,
   isSignInWithEmailLink,
   signInWithEmailLink,
-  sendEmailVerification
+  sendEmailVerification,
+  
 } from 'firebase/auth'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Auth1, db } from '../../configs/firebase'
 import { doc, collection, setDoc, addDoc } from '@firebase/firestore'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged} from 'firebase/auth'
 
-const email = ref()
-const fullname = ref()
-const password = ref()
+const email = ref('')
+const fullname = ref('')
+const password = ref('')
 const router = useRouter()
 const auth = Auth1
-
 // check LogIn
-let isUserLoggedIn = false
-onAuthStateChanged(Auth1, (user) => {
+const isUserLoggedIn = ref(false)
+onAuthStateChanged(auth, (user) => {
   if (user) {
     // Người dùng đã đăng nhập
-    isUserLoggedIn = true
+    isUserLoggedIn.value = true
+    console.log('Người dùng đã đăng nhập')
   } else {
     // Người dùng chưa đăng nhập
-    isUserLoggedIn = false
+    isUserLoggedIn.value = false
     console.log('Người dùng chưa đăng nhập')
   }
 })
 
-console.log(isUserLoggedIn)
+console.log(isUserLoggedIn.value)
 
 // sign with google
 function signInWithGoogle() {
@@ -143,8 +144,8 @@ const signIn = async () => {
           .then(() => {
             console.log('Email verification sent')
             return router.push({
-                path: '/' + user.uid
-              })
+              path: '/' + user.uid
+            })
           })
           .catch((error) => {
             console.error('Error sending email verification:', error)
@@ -156,18 +157,18 @@ const signIn = async () => {
           // the sign-in operation.
           // Get the email if available. This should be available if the user completes
           // the flow on the same device where they started it.
-          let email = window.localStorage.getItem('emailForSignIn')
+          let email2 = window.localStorage.getItem('emailForSignIn')
           if (!email) {
             // User opened the link on a different device. To prevent session fixation
             // attacks, ask the user to provide the associated email again. For example:
-            email = window.prompt('Please provide your email for confirmation')
+            email2 = window.prompt('Please provide your email for confirmation')
           }
           // The client SDK will parse the code from the link for you.
-          signInWithEmailLink(auth, email, window.location.href)
+          signInWithEmailLink(auth, email2, window.location.href)
             .then((result) => {
               // Clear email from storage.
               window.localStorage.removeItem('emailForSignIn')
-             
+
               // You can access the new user via result.user
               // Additional user info profile not available via:
               // result.additionalUserInfo.profile == null
@@ -189,8 +190,6 @@ const signIn = async () => {
       // ..
     })
 }
-
-
 </script>
 
 <style>
