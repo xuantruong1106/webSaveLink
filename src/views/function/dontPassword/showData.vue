@@ -4,37 +4,79 @@
       <button class="button">
         <Router-link :to="{ path: '/user/add/' + uid }"> Add new link </Router-link>
       </button>
-      <button id="add-link-one-way-password-required" class="button is-link " @click="needPass">
-        Add new link one way password required
+
+      <!-- người dùng đã kích hoạt passcode -->
+      <button
+        id="add-link-one-way-pC-required"
+        class="button is-link"
+        @click.prevent="onModalPassCode"
+      >
+        Add new link one way pC required
       </button>
     </div>
-    <div
-      class="modal"
-      :class="{ 'is-active': isPasswordModalOpen }"
-      v-if="isPasswordModalOpen == true"
-    >
+    <div class="modal" :class="{ 'is-active': statusModal }" v-if="statusModal == true">
+      <!-- đã kích hoạt passcode -->
+      <div v-if="statusPassCode == true">
       <div class="modal-background"></div>
       <div class="modal-content">
         <div class="box">
           <div class="field">
             <label class="label">Mật khẩu:</label>
             <div class="control">
-              <input class="input" type="password" placeholder="Nhập mật khẩu" v-model="password" />
+              <input class="input" type="pC" placeholder="Nhập mật khẩu" v-model="pC" />
             </div>
           </div>
           <div class="field is-grouped">
             <div class="control">
-              <button class="button is-primary" @click="confirmPassword">Xác nhận</button>
+              <button class="button is-primary" @click.prevent="accessSpaceNeedPassCode">
+                Xác nhận
+              </button>
             </div>
             <div class="control">
-              <button class="button" @click="closePasswordModal">Hủy</button>
+              <button class="button" @click.prevent="offModalPassCode">CLOSE</button>
             </div>
           </div>
         </div>
       </div>
-      <button class="modal-close is-large" aria-label="close" @click="closePasswordModal"></button>
+      <button
+        class="modal-close is-large"
+        aria-label="close"
+        @click.prevent="offModalPassCode"
+      ></button>
     </div>
-    <div id="notification-email-verified" class="column is-11 is-offset-11" v-if="emailVerifiedUser == false">
+      <!-- đã tắt kích hoạt pascode -->
+      <div v-if="statusPassCode == false">
+        <div class="modal-background"></div>
+        <div class="modal-content" >
+          <div class="box">
+            <div class="field">
+              <label class="label">Bạn đang tắt PASSCODE vui lòng nhấn cài đặt để vào SETTING để bật lại tính năng</label>
+            </div>
+            <div class="field is-grouped">
+              <div class="control">
+                <button class="button is-primary" @click.prevent="alertnotification1">
+                  SETTING
+                </button>
+              </div>
+              <div class="control">
+                <button class="button" @click.prevent="offModalPassCode">CLOSE</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button
+          class="modal-close is-large"
+          aria-label="close"
+          @click.prevent="offModalPassCode"
+        ></button>
+      </div>
+    </div>
+
+    <div
+      id="notification-email-verified"
+      class="column is-11 is-offset-11"
+      v-if="emailVerifiedUser == false"
+    >
       <p>Vui lòng xác nhận email để dùng được các tính năng của trang web</p>
     </div>
   </div>
@@ -118,8 +160,13 @@ const routeVue = useRoute()
 const uid = routeVue.params.uid
 const routerVue = useRouter()
 const emailVerifiedUser = ref(false)
-const isPasswordModalOpen = ref(false)
-const password = ref('')
+const statusModal = ref(false)
+const pC = ref('')
+
+const ThisUserPassCodeID = ref('')
+const passCodeOnFireBase = ref('')
+const statusPassCode = ref('')
+const statusModalPassCode = ref('')
 onMounted(async () => {
   let arrData = []
   let dataEnd = {}
@@ -127,7 +174,7 @@ onMounted(async () => {
   const q = query(collection(db, 'data'), where('uid', '==', uid))
   const querySnap = await getDocs(q)
 
- onAuthStateChanged(Auth1, (user) => {
+  onAuthStateChanged(Auth1, (user) => {
     if (user) {
       emailVerifiedUser.value = user.emailVerified
       // console.log(emailVerifiedUser.value)
@@ -223,34 +270,56 @@ const deleteLink = async (id) => {
   location.reload()
 }
 
-const needPass = () => {
-  isPasswordModalOpen.value = true // Khi người dùng click vào nút "need pass", mở modal
+//{ modal
+const onModalPassCode = () => {
+  statusModal.value = true // Khi người dùng click vào nút "need pass", mở modal
 }
 
-const closePasswordModal = () => {
-  isPasswordModalOpen.value = false // Hàm để đóng modal khi cần thiết
+const offModalPassCode = () => {
+  statusModal.value = false // Hàm để đóng modal khi cần thiết
 }
 
-const confirmPassword = () => {
-  // Perform password verification logic here
-  // For demonstration purposes, let's assume the correct password is 'password123'
-  const correctPassword = '123'
+const alertnotification1 = () => {
+    return routerVue.push('/user/userInfo/' + uid)
+}
 
-  if (password.value === correctPassword) {
-    // Password is correct, perform necessary actions
-    // For example, redirect to a specific page or trigger an event
-    console.log('Password is correct!')
-    // Close the modal after successful verification
-    closePasswordModal()
-
-    return routerVue.push({path: 'user/add/needPassword/' + uid})
+const alertnotification = () => {
+  const statusAlert = alert(
+    'Bạn chưa kích hoạt PassCode vui lòng nhấn ok để vào phần cài đặt để bật PassCode'
+  )
+  if (statusAlert == true) {
+    return routerVue.push('/user/userInfo/' + uid)
   } else {
-    // Password is incorrect, show an error message or perform alternative actions
-    console.log('Incorrect password! Please try again.')
-    // Clear the entered password for the next attempt
-    password.value = ''
+    offModalPassCode()
   }
 }
+//truy vấn trạng thái Pass code bật hay tắt trên firebase từ collection passCode
+onAuthStateChanged(Auth1, async (user) => {
+  const q = query(collection(db, 'passCode'), where('uid', '==', user.uid))
+
+  const querySnapshot = await getDocs(q)
+  if (!querySnapshot.empty) {
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      statusPassCode.value = doc.data().status
+      passCodeOnFireBase.value = doc.data().pC
+      ThisUserPassCodeID.value = doc.id
+    })
+  } else {
+    alertnotification()
+  }
+})
+
+async function accessSpaceNeedPassCode() {
+  if(pC.value = passCodeOnFireBase.value)
+  {
+    return routerVue.push('/user/showData/needPass/' + uid)
+  }
+  else{
+    alert('Vui lòng nhập lại PassCode')
+  }
+}
+//}
 </script>
 
 <style>
@@ -278,8 +347,8 @@ tr {
   flex-wrap: wrap;
 }
 
-#add-link-one-way-password-required {
-  margin-left: -39%;
+#add-link-one-way-pC-required {
+  margin-left: -35%;
 }
 small {
   white-space: nowrap;
@@ -315,7 +384,7 @@ small {
   }
 }
 
-#notification-email-verified{
+#notification-email-verified {
   margin-left: 30%;
 }
 </style>

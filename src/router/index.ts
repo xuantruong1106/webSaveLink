@@ -13,8 +13,7 @@ import showData from '@/views/function/dontPassword/showData.vue'
 //folder function need password
 import addDataNeedPassword from '../views/function/needPassword/addDataNeedPassword.vue'
 import showDataNeedPassword from '../views/function/needPassword/showDataNeedPassword.vue'
-
-
+import updateDataNeddPassword from '../views/function/needPassword/updateDataNeedPassword.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,14 +56,19 @@ const router = createRouter({
           component: addDataNeedPassword
         },
         {
-          path: 'add-link-one-way-password-required/:uid',
-          name: 'add-link-one-way-password-required',
+          path: 'showData/needPass/:uid',
+          name: 'showDataNeedPass',
           component: showDataNeedPassword
         },
         {
           path: 'update/:uid/:idLink',
           name: 'update',
           component: updateData
+        },
+        {
+          path: 'update/needPass/:uid/:idLink',
+          name: 'updateNeedPasword',
+          component: updateDataNeddPassword
         },
         {
           path: 'userInfo/:uid',

@@ -66,7 +66,7 @@
               </div>
               <button class="button is-danger" @click="deleteLink(show.id)">xóa</button>
               <button class="button is-link is-light" style="margin-left: 3%">
-                <Router-link :to="{ path: '/user/update/' + uid + '/' + show.id }">
+                <Router-link :to="{ path: '/user/update/needPass/' + uid + '/' + show.id }">
                   sửa
                 </Router-link>
               </button>
@@ -94,7 +94,7 @@ onMounted(async () => {
   let arrData = []
   let dataEnd = {}
 
-  const q = query(collection(db, 'data'), where('uid', '==', uid))
+  const q = query(collection(db, 'dataNeedPassCode'), where('uid', '==', uid))
   const querySnap = await getDocs(q)
 
   onAuthStateChanged(Auth1, (user) => {
@@ -188,7 +188,7 @@ onMounted(async () => {
 })
 
 const deleteLink = async (id) => {
-  await deleteDoc(doc(db, 'data', id))
+  await deleteDoc(doc(db, 'dataNeedPassCode', id))
   location.reload()
 }
 

@@ -54,12 +54,12 @@
       date: date
     })
     console.log(addLink.value)
-    const dataCollection = collection(db, 'data')
+    const dataCollection = collection(db, 'dataNeedPassCode')
     await setDoc(doc(dataCollection), addLink.value)
     console.log('add link Successfully!')
   
     return router.push({
-      path: '/' + uid
+      path: '/user/showData/needPass/' + uid
     })
   }
   </script>
