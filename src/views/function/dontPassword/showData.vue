@@ -16,41 +16,44 @@
     </div>
     <div class="modal" :class="{ 'is-active': statusModal }" v-if="statusModal == true">
       <!-- đã kích hoạt passcode -->
-      <div v-if="statusPassCode == true">
-      <div class="modal-background"></div>
-      <div class="modal-content">
-        <div class="box">
-          <div class="field">
-            <label class="label">Mật khẩu:</label>
-            <div class="control">
-              <input class="input" type="pC" placeholder="Nhập mật khẩu" v-model="pC" />
+      <div v-if="statusPassCode">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+          <div class="box">
+            <div class="field">
+              <label class="label">Mật khẩu:</label>
+              <div class="control">
+                <input class="input" type="pC" placeholder="Nhập mật khẩu" v-model="pC" />
+              </div>
             </div>
-          </div>
-          <div class="field is-grouped">
-            <div class="control">
-              <button class="button is-primary" @click.prevent="accessSpaceNeedPassCode">
-                Xác nhận
-              </button>
-            </div>
-            <div class="control">
-              <button class="button" @click.prevent="offModalPassCode">CLOSE</button>
+            <div class="field is-grouped">
+              <div class="control">
+                <button class="button is-primary" @click.prevent="accessSpaceNeedPassCode">
+                  Xác nhận
+                </button>
+              </div>
+              <div class="control">
+                <button class="button" @click.prevent="offModalPassCode">CLOSE</button>
+              </div>
             </div>
           </div>
         </div>
+        <button
+          class="modal-close is-large"
+          aria-label="close"
+          @click.prevent="offModalPassCode"
+        ></button>
       </div>
-      <button
-        class="modal-close is-large"
-        aria-label="close"
-        @click.prevent="offModalPassCode"
-      ></button>
-    </div>
       <!-- đã tắt kích hoạt pascode -->
-      <div v-if="statusPassCode == false">
+      <div v-else>
         <div class="modal-background"></div>
-        <div class="modal-content" >
+        <div class="modal-content">
           <div class="box">
             <div class="field">
-              <label class="label">Bạn đang tắt PASSCODE vui lòng nhấn cài đặt để vào SETTING để bật lại tính năng</label>
+              <label class="label"
+                >Bạn đang tắt PASSCODE vui lòng nhấn cài đặt để vào SETTING để bật lại tính
+                năng</label
+              >
             </div>
             <div class="field is-grouped">
               <div class="control">
@@ -134,10 +137,10 @@
                   </div>
                 </article>
               </div>
-              <button class="button is-danger" @click="deleteLink(show.id)">xóa</button>
+              <button class="button is-danger" @click="deleteLink(show.id)">delete</button>
               <button class="button is-link is-light" style="margin-left: 3%">
                 <Router-link :to="{ path: '/user/update/' + uid + '/' + show.id }">
-                  sửa
+                  edit
                 </Router-link>
               </button>
             </div>
@@ -155,7 +158,19 @@ import { collection, query, where, getDocs, doc, deleteDoc } from '@firebase/fir
 import { useRoute, useRouter } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
 
-let showDataDetail = ref([])
+interface ShowData {
+  id: string
+  title: string
+  link: string
+  describe: string
+  minute?: number
+  hour?: number
+  day?: number
+  month?: number
+  year?: number
+}
+
+let showDataDetail = ref<ShowData[]>([])
 const routeVue = useRoute()
 const uid = routeVue.params.uid
 const routerVue = useRouter()
@@ -168,8 +183,16 @@ const passCodeOnFireBase = ref('')
 const statusPassCode = ref('')
 const statusModalPassCode = ref('')
 onMounted(async () => {
-  let arrData = []
-  let dataEnd = {}
+  let arrData: ShowData[] = []
+  let dataEnd: ShowData = {
+    id: '',
+    title: '',
+    link: '',
+    describe: '',
+    minute: 0,
+    hour: 0,
+    day: 0
+  }
 
   const q = query(collection(db, 'data'), where('uid', '==', uid))
   const querySnap = await getDocs(q)
@@ -181,7 +204,7 @@ onMounted(async () => {
       if (user.uid == uid) {
         // Người dùng đã đăng nhập
         querySnap.forEach((doc) => {
-          const Data = {
+          const Data: ShowData = {
             id: doc.id,
             title: doc.data().title,
             link: doc.data().link,
@@ -197,7 +220,7 @@ onMounted(async () => {
           const hourNow = timeNow.getHours()
           const dayNow = timeNow.getDate()
 
-          if (dayNow != Data.day) {
+          if (dayNow !== Data.day) {
             dataEnd = {
               id: doc.id,
               title: doc.data().title,
@@ -208,22 +231,28 @@ onMounted(async () => {
               year: doc.data().date.toDate().getFullYear()
             }
           } else {
-            if (hourNow != Data.hour) {
+            if (Data.hour !== undefined) {
               const hours = Math.abs(hourNow - Data.hour)
               dataEnd = {
                 id: doc.id,
                 title: doc.data().title,
                 link: doc.data().link,
                 describe: doc.data().describe,
+                day: Data.day,
+                month: Data.month,
+                year: Data.year,
                 hour: hours
               }
-            } else {
+            } else if (Data.minute !== undefined) {
               const minutes = Math.abs(minuteNow - Data.minute)
               dataEnd = {
                 id: doc.id,
                 title: doc.data().title,
                 link: doc.data().link,
                 describe: doc.data().describe,
+                day: Data.day,
+                month: Data.month,
+                year: Data.year,
                 minute: minutes
               }
             }
@@ -231,10 +260,12 @@ onMounted(async () => {
           arrData.push(dataEnd)
         })
         arrData.sort((a, b) => {
-          const timeA = a.hour || a.minute || a.day
-          const timeB = b.hour || b.minute || b.day
+          const timeA = a.hour !== undefined ? a.hour : 0
+          const timeB = b.hour !== undefined ? b.hour : 0
+
           return timeA - timeB
         })
+
         // const arrData1 = arrData
         showDataDetail.value = arrData
       } else {
@@ -259,13 +290,13 @@ onMounted(async () => {
       // Người dùng chưa đăng nhập
 
       routerVue.push({
-        path: '/logIn'
+        path: '/'
       })
     }
   })
 })
 
-const deleteLink = async (id) => {
+const deleteLink = async (id: string) => {
   await deleteDoc(doc(db, 'data', id))
   location.reload()
 }
@@ -280,13 +311,14 @@ const offModalPassCode = () => {
 }
 
 const alertnotification1 = () => {
-    return routerVue.push('/user/userInfo/' + uid)
+  return routerVue.push('/user/userInfo/' + uid)
 }
 
 const alertnotification = () => {
-  const statusAlert = alert(
+  const statusAlert = confirm(
     'Bạn chưa kích hoạt PassCode vui lòng nhấn ok để vào phần cài đặt để bật PassCode'
   )
+
   if (statusAlert == true) {
     return routerVue.push('/user/userInfo/' + uid)
   } else {
@@ -295,7 +327,7 @@ const alertnotification = () => {
 }
 //truy vấn trạng thái Pass code bật hay tắt trên firebase từ collection passCode
 onAuthStateChanged(Auth1, async (user) => {
-  const q = query(collection(db, 'passCode'), where('uid', '==', user.uid))
+  const q = query(collection(db, 'passCode'), where('uid', '==', user?.uid))
 
   const querySnapshot = await getDocs(q)
   if (!querySnapshot.empty) {
@@ -311,11 +343,9 @@ onAuthStateChanged(Auth1, async (user) => {
 })
 
 async function accessSpaceNeedPassCode() {
-  if(pC.value = passCodeOnFireBase.value)
-  {
+  if ((pC.value = passCodeOnFireBase.value)) {
     return routerVue.push('/user/showData/needPass/' + uid)
-  }
-  else{
+  } else {
     alert('Vui lòng nhập lại PassCode')
   }
 }

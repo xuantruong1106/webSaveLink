@@ -64,10 +64,10 @@
                   </div>
                 </article>
               </div>
-              <button class="button is-danger" @click="deleteLink(show.id)">xóa</button>
+              <button class="button is-danger" @click="deleteLink(show.id)">delete</button>
               <button class="button is-link is-light" style="margin-left: 3%">
                 <Router-link :to="{ path: '/user/update/needPass/' + uid + '/' + show.id }">
-                  sửa
+                  edit
                 </Router-link>
               </button>
             </div>
@@ -84,15 +84,35 @@ import { collection, query, where, getDocs, doc, deleteDoc } from '@firebase/fir
 import { useRoute, useRouter } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
 
-let showDataDetail = ref([])
+interface ShowData {
+  id: string
+  title: string
+  link: string
+  describe: string
+  minute?: number
+  hour?: number
+  day?: number
+  month?: number
+  year?: number
+}
+
+let showDataDetail = ref<ShowData[]>([])
 const routeVue = useRoute()
 const uid = routeVue.params.uid
 const routerVue = useRouter()
 const emailVerified = ref(false)
 console.log(emailVerified)
 onMounted(async () => {
-  let arrData = []
-  let dataEnd = {}
+  let arrData: ShowData[] = []
+  let dataEnd: ShowData = {
+    id: '',
+    title: '',
+    link: '',
+    describe: '',
+    minute: 0,
+    hour: 0,
+    day: 0
+  }
 
   const q = query(collection(db, 'dataNeedPassCode'), where('uid', '==', uid))
   const querySnap = await getDocs(q)
@@ -101,9 +121,9 @@ onMounted(async () => {
     if (user) {
       if (user.uid == uid) {
         // Người dùng đã đăng nhập
-        emailVerified.value = Auth1.currentUser?.emailVerified
+        emailVerified.value = user.emailVerified ?? false
         querySnap.forEach((doc) => {
-          const Data = {
+          const Data: ShowData = {
             id: doc.id,
             title: doc.data().title,
             link: doc.data().link,
@@ -119,7 +139,7 @@ onMounted(async () => {
           const hourNow = timeNow.getHours()
           const dayNow = timeNow.getDate()
 
-          if (dayNow != Data.day) {
+          if (dayNow !== Data.day) {
             dataEnd = {
               id: doc.id,
               title: doc.data().title,
@@ -130,22 +150,28 @@ onMounted(async () => {
               year: doc.data().date.toDate().getFullYear()
             }
           } else {
-            if (hourNow != Data.hour) {
+            if (Data.hour !== undefined) {
               const hours = Math.abs(hourNow - Data.hour)
               dataEnd = {
                 id: doc.id,
                 title: doc.data().title,
                 link: doc.data().link,
                 describe: doc.data().describe,
+                day: Data.day,
+                month: Data.month,
+                year: Data.year,
                 hour: hours
               }
-            } else {
+            } else if (Data.minute !== undefined) {
               const minutes = Math.abs(minuteNow - Data.minute)
               dataEnd = {
                 id: doc.id,
                 title: doc.data().title,
                 link: doc.data().link,
                 describe: doc.data().describe,
+                day: Data.day,
+                month: Data.month,
+                year: Data.year,
                 minute: minutes
               }
             }
@@ -153,8 +179,9 @@ onMounted(async () => {
           arrData.push(dataEnd)
         })
         arrData.sort((a, b) => {
-          const timeA = a.hour || a.minute || a.day
-          const timeB = b.hour || b.minute || b.day
+          const timeA = a.hour !== undefined ? a.hour : 0
+          const timeB = b.hour !== undefined ? b.hour : 0
+
           return timeA - timeB
         })
         // const arrData1 = arrData
@@ -181,13 +208,13 @@ onMounted(async () => {
       // Người dùng chưa đăng nhập
 
       routerVue.push({
-        path: '/logIn'
+        path: '/'
       })
     }
   })
 })
 
-const deleteLink = async (id) => {
+const deleteLink = async (id: string) => {
   await deleteDoc(doc(db, 'dataNeedPassCode', id))
   location.reload()
 }

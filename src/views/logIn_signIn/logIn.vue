@@ -107,7 +107,7 @@ function signInWithGoogle() {
   signInWithPopup(auth, provider)
     .then((result) => {
       const credential = GoogleAuthProvider.credentialFromResult(result)
-      const token = credential.accessToken
+      const token = credential?.accessToken // Add null check using optional chaining
       const user = result.user
       router.push({
         path: '/' + user.uid

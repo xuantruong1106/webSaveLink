@@ -40,7 +40,7 @@
     if (!user) {
       // Người dùng đã đăng nhập
       router.push({
-        path: '/logIn'
+        path: '/'
       })
     }
   })

@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { defineComponent, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { Auth1} from '@/configs/firebase'
+import { Auth1} from '../../configs/firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
@@ -74,7 +74,7 @@ onAuthStateChanged(Auth1, (user) => {
   if (user) {
     // Người dùng đã đăng nhập
     isUserLoggedIn.value = true
-    name.value = user.displayName
+    name.value = user.displayName ?? '' // Provide default value of empty string
     isEmailVerified.value = user.emailVerified
     uid = user.uid
   } else {

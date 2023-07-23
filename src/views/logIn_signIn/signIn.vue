@@ -60,14 +60,13 @@ import {
   createUserWithEmailAndPassword,
   isSignInWithEmailLink,
   signInWithEmailLink,
-  sendEmailVerification,
-  
+  sendEmailVerification
 } from 'firebase/auth'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Auth1, db } from '../../configs/firebase'
 import { doc, collection, setDoc, addDoc } from '@firebase/firestore'
-import { onAuthStateChanged} from 'firebase/auth'
+import { onAuthStateChanged } from 'firebase/auth'
 
 const email = ref('')
 const fullname = ref('')
@@ -96,7 +95,7 @@ function signInWithGoogle() {
   signInWithPopup(auth, provider)
     .then((result) => {
       const credential = GoogleAuthProvider.credentialFromResult(result)
-      const token = credential.accessToken
+      const token = credential?.accessToken // Add null check using optional chaining
       const user = result.user
       router.push({
         path: '/' + user.uid
@@ -126,7 +125,7 @@ const signIn = async () => {
 
         console.log('save info done')
 
-        const updateDisplayName = async (displayName) => {
+        const updateDisplayName = async (displayName: string) => {
           try {
             await updateProfile(user, { displayName })
             console.log('Display name updated successfully:', displayName)
@@ -157,13 +156,15 @@ const signIn = async () => {
           // the sign-in operation.
           // Get the email if available. This should be available if the user completes
           // the flow on the same device where they started it.
-          let email2 = window.localStorage.getItem('emailForSignIn')
-          if (!email) {
+          var email2 = 'null2'
+          const storedEmail = window.localStorage.getItem('emailForSignIn')
+          email2 = storedEmail !== null ? storedEmail : 'null2'
+          if (!email2) {
             // User opened the link on a different device. To prevent session fixation
             // attacks, ask the user to provide the associated email again. For example:
-            email2 = window.prompt('Please provide your email for confirmation')
+            email2 = window.prompt('Please provide your email for confirmation') || 'null2'
           }
-          // The client SDK will parse the code from the link for you.
+          // The client SDK will parse the code from the link for you.`
           signInWithEmailLink(auth, email2, window.location.href)
             .then((result) => {
               // Clear email from storage.
@@ -177,7 +178,7 @@ const signIn = async () => {
             })
             .catch((error) => {
               // Some error occurred, you can inspect the code: error.code
-              // Common errors could be invalid email and invalid or expired OTPs.
+              // Common errors could be an invalid email and invalid or expired OTPs.
             })
         }
       } else {

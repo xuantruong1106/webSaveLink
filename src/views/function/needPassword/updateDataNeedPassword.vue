@@ -30,7 +30,7 @@
   import { ref } from 'vue'
   import { onMounted } from 'vue'
   import { onAuthStateChanged } from 'firebase/auth'
-  import { Auth1, db } from '@/configs/firebase'
+  import { Auth1, db } from '../../../configs/firebase'
   import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
   
   const showDataDetail = ref([])
@@ -51,21 +51,24 @@
     onAuthStateChanged(Auth1, (user) => {
       if (!user) {
         routerVue.push({
-          path: '/logIn'
+          path: '/'
         })
       }
   
       // Người dùng đã đăng nhập
-      const data = {
+    const data = querySnap.data()
+    if (data) {
+      const { title, link, describe } = data
+      const updatedData = {
         id: querySnap.id,
-        title: querySnap.data().title,
-        link: querySnap.data().link,
-        describe: querySnap.data().describe
+        title: title,
+        link: link,
+        describe: describe
       }
-      // arrData.push(data)
-      link.value = data.link
-      title.value = data.title
-      describe.value = data.describe
+      link.value = updatedData.link
+      title.value = updatedData.title
+      describe.value = updatedData.describe
+    }
     })
     // showDataDetail.value = arrData
     // console.log(showDataDetail.value[0].link)

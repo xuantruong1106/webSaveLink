@@ -26,11 +26,11 @@
         </button>
       </div>
 
-      <span class="tag is-primary is-light">passCode</span>
+      <span class="tag is-primary is-light">Password</span>
       <div class="box">
         <div>
           <button id="btn-change-passCode" class="button is-primary" @click="changePassword">
-            Change passCode
+            Change Password
           </button>
         </div>
       </div>
@@ -62,7 +62,7 @@
           PASSCODE: {{ statusPassCode ? 'ON' : 'OFF' }}
         </button>
         <div>
-          <span v-if="statusPassCode == false" class="alert">{{
+          <span v-if="!statusPassCode" class="alert">{{
             statusPassCode
               ? 'Bạn đã bật PASSCODE tính năng lưu cần mật khẩu đã bật'
               : 'Bạn chưa bật PASSCODE tính năng lưu cần mật khẩu bị tắt'
@@ -73,7 +73,7 @@
         <div
           class="modal"
           :class="{ 'is-active': showModal }"
-          v-if="statusPassCode == false && firstOnPassCode == 0"
+          v-if="!statusPassCode && firstOnPassCode == 0"
         >
           <div class="modal-background"></div>
           <div class="modal-content">
@@ -111,7 +111,7 @@
         <div
           class="modal"
           :class="{ 'is-active': showModal }"
-          v-if="statusPassCode == false && firstOnPassCode == 1"
+          v-if="!statusPassCode && firstOnPassCode == 1"
         >
           <div class="modal-background"></div>
           <div class="modal-content">
@@ -145,7 +145,7 @@
         </div>
 
         <!-- model xác nhận tắt passcode -->
-        <div class="modal" :class="{ 'is-active': showModal }" v-if="statusPassCode == true">
+        <div class="modal" :class="{ 'is-active': showModal }" v-if="statusPassCode">
           <div class="modal-background"></div>
           <div class="modal-content">
             <div class="box">
@@ -210,7 +210,7 @@ const routerVue = useRouter()
 const email = ref('')
 const editingEmail = ref(false)
 
-const fullName = ref('')
+const fullName = ref()
 const editingFullName = ref(false)
 
 const imageUrl = ref('')
@@ -241,15 +241,15 @@ const firstOnPassCode = ref()
 onAuthStateChanged(Auth1, (user) => {
   if (!user) {
     return routerVue.push({
-      path: '/logIn'
+      path: '/'
     })
   } else {
     //hiển thị thông tin của user
-    showStatusEmailVerified.value = Auth1.currentUser?.emailVerified
+    showStatusEmailVerified.value = Auth1.currentUser?.emailVerified || false
     usesrStatus.value = true
-    fullName.value = user.displayName
-    email.value = user.email
-    imageUrl.value = user.photoURL
+    fullName.value = user.displayName ?? ''
+    email.value = user.email ?? ''
+    imageUrl.value = user.photoURL ?? ''
   }
 })
 
@@ -318,9 +318,9 @@ async function toggleEditFullName() {
 }
 
 //update image
-const updateImg = async () => {
+const updateImg = async (event: Event) => {
   // lưu đường dẫn file vào biến file
-  const file = event.target.files[0]
+  const file = (event.target as HTMLInputElement).files?.[0]
   //nếu có tồn tại file
   if (file) {
     // khai báo lưu file vào thư mục proifile trong storage firebase
@@ -367,7 +367,7 @@ const changePassword = async () => {
         // Ví dụ: cho phép người dùng đặt lại mật khẩu
         // Sử dụng thông tin người dùng và liên kết hiện tại để hoàn thành quá trình đặt lại mật khẩu
         return routerVue.push({
-          path: '/logIn'
+          path: '/'
         })
       } else {
         // Người dùng chưa kích hoạt link reset mật khẩu
@@ -400,7 +400,7 @@ const closepassCodeModal = () => {
 
 //truy vấn trạng thái Pass code bật hay tắt trên firebase từ collection passCode
 onAuthStateChanged(Auth1, async (user) => {
-  const q = query(collection(db, 'passCode'), where('uid', '==', user.uid))
+  const q = query(collection(db, 'passCode'), where('uid', '==', user?.uid))
 
   const querySnapshot = await getDocs(q)
   if (!querySnapshot.empty) {
@@ -414,7 +414,7 @@ onAuthStateChanged(Auth1, async (user) => {
     // console.log(statusPassCode, passCodeOnFireBase)
   } else {
     console.log('người dùng chưa bật passCode')
-    statusPassCode.value = false
+    statusPassCode.value = false.toString();
   }
 })
 
@@ -423,7 +423,7 @@ async function onPassCode() {
   const docRef = await addDoc(collection(db, 'passCode'), {
     pass: passCode.value,
     status: statusOnpassCodeOnFireBase.value,
-    uid: user.uid
+    uid: user?.uid || ''
   })
   ThisUserPassCodeID.value = docRef.id
   console.log('on passcode on firebase successful')
@@ -448,7 +448,7 @@ async function offPassCode() {
 async function onAgainPassCode() {
   if (passCode.value == passCodeOnFireBase.value) {
     console.log(ThisUserPassCodeID.value)
-    const docRef = doc(db, 'passCode', ThisUserPassCodeID.value.toString() ) // Adjust the document reference based on your Firestore structure
+    const docRef = doc(db, 'passCode', ThisUserPassCodeID.value.toString()) // Adjust the document reference based on your Firestore structure
 
     await updateDoc(docRef, {
       status: statusOnpassCodeOnFireBase.value
@@ -460,12 +460,10 @@ async function onAgainPassCode() {
   }
 }
 
-
-
 //gọi modal
 function modelPassCode() {
   openpassCodeModal()
-  if (statusPassCode == false) {
+  if (!statusPassCode) {
     onPassCode()
   } else {
     offPassCode()

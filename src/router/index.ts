@@ -1,4 +1,4 @@
-import { vue } from "@vitejs/plugin-vue";
+// import { vue } from "@vitejs/plugin-vue";
 import { createRouter, createWebHistory } from 'vue-router'
 import user from '../views/user.vue'
 //folder login_sign
@@ -26,7 +26,7 @@ const router = createRouter({
       
     },
     {
-      path: '/logIn',
+      path: '/',
       name: 'logIn',
       component: loginVue
     },
