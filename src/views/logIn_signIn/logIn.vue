@@ -60,9 +60,8 @@ import {
   onAuthStateChanged
 } from 'firebase/auth'
 import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { Auth1, db } from '../../configs/firebase'
-import { doc, query, where, collection, getDocs } from '@firebase/firestore'
+import { useRouter } from 'vue-router'
+import { Auth1 } from '../../configs/firebase'
 
 const email = ref('')
 const password = ref('')
