@@ -57,7 +57,7 @@
         <button
           id="btn-login-don't-passCode"
           class="button is-primary is-light"
-          @click="modelPassCode"
+          @click="openpassCodeModal()"
         >
           PASSCODE: {{ statusPassCode ? 'ON' : 'OFF' }}
         </button>
@@ -162,7 +162,7 @@
               </div>
               <div class="field is-grouped">
                 <div class="control">
-                  <button class="button is-primary" @click="offPassCode">Xác nhận</button>
+                  <button class="button is-primary" @click="offPassCode()">Xác nhận</button>
                 </div>
                 <div class="control">
                   <button class="button" @click="closepassCodeModal">Hủy</button>
@@ -225,7 +225,7 @@ const showModal = ref(false)
 
 const passCode = ref('')
 
-const statusPassCode = ref('')
+const statusPassCode = ref(false)
 
 const statusOnpassCodeOnFireBase = ref(true)
 
@@ -411,10 +411,11 @@ onAuthStateChanged(Auth1, async (user) => {
       ThisUserPassCodeID.value = doc.id
     })
     firstOnPassCode.value = 1
-    // console.log(statusPassCode, passCodeOnFireBase)
   } else {
+    firstOnPassCode.value = 0
     console.log('người dùng chưa bật passCode')
-    statusPassCode.value = false.toString();
+
+    statusPassCode.value = false;
   }
 })
 
@@ -463,11 +464,9 @@ async function onAgainPassCode() {
 //gọi modal
 function modelPassCode() {
   openpassCodeModal()
-  if (!statusPassCode) {
+ 
     onPassCode()
-  } else {
-    offPassCode()
-  }
+  
 }
 //}
 </script>

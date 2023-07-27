@@ -1,6 +1,6 @@
 <template>
   <div class="columns is-mobile">
-    <h1 class="column is-4 title is-2 is-warning is-light button" > LINK NEED PASSWORD</h1>
+    <h1 class="column is-4 title is-2 is-warning is-light button" > PRIVACY SPACE</h1>
     <div id="btn" class="column is-4" v-if="emailVerified == true">
       <button class="button">
         <Router-link :to="{ path: '/user/add/needPassword/' + uid }"> Add new link </Router-link>
@@ -24,12 +24,8 @@
                     <div class="content">
                       <strong>{{ show.title }}</strong>
                       &nbsp;
-                      <small v-if="'day' in show">
-                        add in: {{ show.day }}/{{ show.month }}/{{ show.year }}
-                      </small>
-                      <small v-if="'hour' in show"> add in before: {{ show.hour }} hours </small>
-                      <small v-if="'minute' in show">
-                        add in before: {{ show.minute }} minutes
+                      <small>
+                        add in: {{show.hour}}h{{show.minute}}' {{ show.day }}/{{ show.month }}/{{ show.year }}
                       </small>
                       <a :href="show.link" target="_bank" style="text-decoration: none">
                         <p>
@@ -70,6 +66,7 @@
                   edit
                 </Router-link>
               </button>
+              <button class="button is-primary" style="margin-left: 3%" @click.prevent="unPrivacySpace(show.id, show.title, show.link, show.describe)"> unprivacy</button>
             </div>
           </td>
         </tr>
@@ -80,7 +77,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { db, Auth1 } from '../../../configs/firebase'
-import { collection, query, where, getDocs, doc, deleteDoc } from '@firebase/firestore'
+import { collection, query, where, getDocs, doc, deleteDoc, setDoc, serverTimestamp } from '@firebase/firestore'
 import { useRoute, useRouter } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
 
@@ -101,18 +98,11 @@ const routeVue = useRoute()
 const uid = routeVue.params.uid
 const routerVue = useRouter()
 const emailVerified = ref(false)
+const date = serverTimestamp()
 console.log(emailVerified)
 onMounted(async () => {
   let arrData: ShowData[] = []
-  let dataEnd: ShowData = {
-    id: '',
-    title: '',
-    link: '',
-    describe: '',
-    minute: 0,
-    hour: 0,
-    day: 0
-  }
+ 
 
   const q = query(collection(db, 'dataNeedPassCode'), where('uid', '==', uid))
   const querySnap = await getDocs(q)
@@ -130,7 +120,9 @@ onMounted(async () => {
             describe: doc.data().describe,
             minute: doc.data().date.toDate().getMinutes(),
             hour: doc.data().date.toDate().getHours(),
-            day: doc.data().date.toDate().getDate()
+            day: doc.data().date.toDate().getDate(),
+            month: doc.data().date.toDate().getMonth() + 1,
+            year: doc.data().date.toDate().getFullYear()
           }
 
           //hàm lấy thời gian theo giờ máy tính
@@ -139,52 +131,45 @@ onMounted(async () => {
           const hourNow = timeNow.getHours()
           const dayNow = timeNow.getDate()
 
-          if (dayNow !== Data.day) {
-            dataEnd = {
-              id: doc.id,
-              title: doc.data().title,
-              link: doc.data().link,
-              describe: doc.data().describe,
-              day: doc.data().date.toDate().getDate(),
-              month: doc.data().date.toDate().getMonth() + 1,
-              year: doc.data().date.toDate().getFullYear()
-            }
-          } else {
-            if (Data.hour !== undefined) {
-              const hours = Math.abs(hourNow - Data.hour)
-              dataEnd = {
-                id: doc.id,
-                title: doc.data().title,
-                link: doc.data().link,
-                describe: doc.data().describe,
-                day: Data.day,
-                month: Data.month,
-                year: Data.year,
-                hour: hours
-              }
-            } else if (Data.minute !== undefined) {
-              const minutes = Math.abs(minuteNow - Data.minute)
-              dataEnd = {
-                id: doc.id,
-                title: doc.data().title,
-                link: doc.data().link,
-                describe: doc.data().describe,
-                day: Data.day,
-                month: Data.month,
-                year: Data.year,
-                minute: minutes
-              }
-            }
-          }
-          arrData.push(dataEnd)
+          arrData.push(Data)
         })
         arrData.sort((a, b) => {
-          const timeA = a.hour !== undefined ? a.hour : 0
-          const timeB = b.hour !== undefined ? b.hour : 0
+          // Kiểm tra các thông tin ngày, tháng, năm, giờ và phút trước khi sử dụng
+          const yearA = a.year !== undefined ? a.year : 0;
+          const monthA = a.month !== undefined ? a.month - 1 : 0;
+          const dayA = a.day !== undefined ? a.day : 1;
+          const hourA = a.hour !== undefined ? a.hour : 0;
+          const minuteA = a.minute !== undefined ? a.minute : 0;
 
-          return timeA - timeB
-        })
-        // const arrData1 = arrData
+          const yearB = b.year !== undefined ? b.year : 0;
+          const monthB = b.month !== undefined ? b.month - 1 : 0;
+          const dayB = b.day !== undefined ? b.day : 1;
+          const hourB = b.hour !== undefined ? b.hour : 0;
+          const minuteB = b.minute !== undefined ? b.minute : 0;
+          // Chuyển các thông tin ngày, tháng, năm, giờ và phút sang dạng timestamp để so sánh
+          const timestampA = new Date(yearA, monthA, dayA, hourA, minuteA).getTime();
+          const timestampB = new Date(yearB, monthB, dayB, hourB, minuteB).getTime();
+
+
+          // Nếu có cùng ngày, tháng, năm
+          if (timestampA === timestampB) {
+            // Tiếp tục so sánh theo phút
+            const minuteA = a.minute !== undefined ? a.minute : 0;
+            const minuteB = b.minute !== undefined ? b.minute : 0;
+            if (minuteA !== minuteB) {
+              // Sắp xếp theo phút tăng dần (nhỏ nhất trước)
+              return minuteA - minuteB;
+            }
+
+            // Tiếp tục so sánh theo giờ
+            const hourA = a.hour !== undefined ? a.hour : 0;
+            const hourB = b.hour !== undefined ? b.hour : 0;
+            return hourA - hourB;
+          }
+
+          // Nếu khác ngày, tháng, năm, sắp xếp theo ngày, tháng, năm giảm dần
+          return timestampB - timestampA;
+        });
         showDataDetail.value = arrData
       } else {
         // Đường link không chứa param 'userId'
@@ -218,6 +203,19 @@ const deleteLink = async (id: string) => {
   await deleteDoc(doc(db, 'dataNeedPassCode', id))
   location.reload()
 }
+
+async function unPrivacySpace(idLink: string, titleAddPrivacySpace: string, linkAddPrivacySpace: string, describeAddPrivacySpace: string){
+ 
+    await setDoc(doc(db, 'data', idLink.toString()), {
+    title: titleAddPrivacySpace,
+    describe: describeAddPrivacySpace,
+    link: linkAddPrivacySpace,
+    uid: uid, 
+    date: date
+  })
+  deleteLink(idLink)
+  console.log('done')
+  }
 
 </script>
 

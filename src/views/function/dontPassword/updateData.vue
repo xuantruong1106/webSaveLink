@@ -4,18 +4,18 @@
       <div class="columns">
         <div class="column is-four-fifths">
           <span class="tag is-primary is-light">Link</span>
-          <input class="input is-primary" type="text" v-model="link" />
+          <input class="input is-primary" type="text" :placeholder="linkPhr" v-model="link"/>
         </div>
         <div class="column">
           <span class="tag is-primary is-light">Title</span>
-          <input class="input is-primary" type="text" v-model="title" />
+          <input class="input is-primary" type="text" :placeholder="titlePhr" v-model="title"/>
         </div>
       </div>
 
       <div class="columns">
         <div class="column is-two-thirds">
           <span class="tag is-primary is-light">Describe</span>
-          <textarea class="textarea" type="text" v-model="describe"></textarea>
+          <textarea class="textarea" type="text" :placeholder="describePhr" v-model="describe"></textarea>
         </div>
         <div class="column auto">
           <button class="button is-success" style="margin-top: 15%">update</button>
@@ -35,40 +35,36 @@ import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/fires
 
 const showDataDetail = ref([])
 const RouteVue = useRoute()
+const routerVue = useRouter()
 const uid = RouteVue.params.uid
 const idLink = RouteVue.params.idLink
-const routerVue = useRouter()
+
 const link = ref('')
 const title = ref('')
 const describe = ref('')
 const date = serverTimestamp()
-let arrData = []
 
-onMounted(async () => {
-  const q = doc(collection(db, 'data'), idLink.toString())
-  const querySnap = await getDoc(q)
+const linkPhr =  ref('')
+let titlePhr =  ''
+let describePhr =  ''
+onMounted( () => {
 
-  onAuthStateChanged(Auth1, (user) => {
+  onAuthStateChanged(Auth1, async (user) => {
     if (!user) {
       routerVue.push({
         path: '/'
       })
     }
-
+    const q = doc(collection(db, 'data'), idLink.toString())
+    const querySnap = await getDoc(q)
     // Người dùng đã đăng nhập
     const data = querySnap.data()
     if (data) {
-      const { title, link, describe } = data
-      const updatedData = {
-        id: querySnap.id,
-        title: title,
-        link: link,
-        describe: describe
-      }
-      link.value = updatedData.link
-      title.value = updatedData.title
-      describe.value = updatedData.describe
+      linkPhr.value = data.link
+      titlePhr = data.title
+      describePhr = data.describe
     }
+    console.log(linkPhr)
   })
 })
 
@@ -77,11 +73,12 @@ const updateLink = async () => {
     title: title.value,
     describe: describe.value,
     link: link.value,
-    uid: uid,
+    uid: uid, 
     date: date
   })
 
-  console.log('Update done')
+  
+  // console.log(title.value+ '/' + describe.value + '/'+ link.value + '/' +'Update done')
 
   return routerVue.push({ path: '/' + uid })
 }

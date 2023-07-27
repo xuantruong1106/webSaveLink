@@ -34,7 +34,7 @@
         <div class="navbar-item">
           <div class="buttons">
             <a class="button is-primary">
-              <RouterLink to="/logIn">
+              <RouterLink to="/">
                 <p>LogIn</p>
               </RouterLink>
             </a>
@@ -61,10 +61,8 @@ import { RouterLink } from 'vue-router'
 import { Auth1} from '../../configs/firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { useRouter } from 'vue-router'
-import { useRoute } from 'vue-router'
-import { collection, query, where, getDocs } from '@firebase/firestore'
-import { userInfo } from 'os'
 
+const router = useRouter()
 let name = ref('')
 let isUserLoggedIn = ref(false) // Initialize with false
 let isEmailVerified = ref(false)
@@ -91,8 +89,8 @@ const handleLogout = () => {
   signOut(Auth1)
     .then(() => {
       // Logout successful
-      location.reload()
       console.log('Logout successful')
+      router.push({path: '/'})
     })
     .catch((error) => {
       // An error occurred during logout
