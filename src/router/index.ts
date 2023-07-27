@@ -20,7 +20,7 @@ const router = createRouter({
   
   routes: [
     {
-      path: '/:uid',
+      path: '/home/:uid',
       name: 'home',
       component: showData,
       

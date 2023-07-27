@@ -17,7 +17,7 @@
         <div class="modal-content">
           <div class="box">
             <div class="field">
-              <label class="label">Mật khẩu:</label>
+              <label class="label">Enter PassCode:</label>
               <div class="control">
                 <input class="input" type="password" placeholder="Nhập mật khẩu" v-model="pC" />
               </div>
@@ -25,7 +25,7 @@
             <div class="field is-grouped">
               <div class="control">
                 <button class="button is-primary" @click.prevent="accessPrivacySpace">
-                  Xác nhận
+                  Confirm
                 </button>
               </div>
               <div class="control">
@@ -47,8 +47,8 @@
           <div class="box">
             <div class="field">
               <label class="label"
-                >Bạn đang tắt PASSCODE vui lòng nhấn cài đặt để vào SETTING để bật lại tính
-                năng</label
+                >You are turning off PASSCODE please press settings to enter SETTING to turn the
+                feature back on</label
               >
             </div>
             <div class="field is-grouped">
@@ -76,7 +76,7 @@
       class="column is-11 is-offset-11"
       v-if="emailVerifiedUser == false"
     >
-      <p>Vui lòng xác nhận email để dùng được các tính năng của trang web</p>
+      <p>Please confirm your email to use the site's features</p>
     </div>
   </div>
   <div class="table-container">
@@ -131,39 +131,41 @@
                   </div>
                 </article>
               </div>
-              <button class="button is-danger" @click.prevent="onModelDeleteLink">delete</button>
-              <div class="modal" :class="{ 'is-active': statusModalDeleteLink }" v-if="statusModalDeleteLink == true">
-                  <div class="modal-background"></div>
-                  <div class="modal-content">
-                    <div class="box">
-                      <div class="field">
-                        <label class="notification label is-danger">XÁC NHẬN XÓA LINK</label>
+              <button class="button is-danger" @click.prevent="run(show.id)">delete</button>
+              <div
+                class="modal"
+                :class="{ 'is-active': statusModalDeleteLink }"
+                v-if="statusModalDeleteLink == true"
+              >
+                <div class="modal-background"></div>
+                <div class="modal-content">
+                  <div class="box">
+                    <div class="field">
+                      <label class="notification label is-danger">CONFIRM DELETE LINK</label>
+                    </div>
+                    <div class="field is-grouped">
+                      <div class="control">
+                        <button class="button is-danger" @click.prevent="deleteLink(saveIdDeleteLink)">Confirm</button>
                       </div>
-                      <div class="field is-grouped">
-                        <div class="control">
-                          <button class="button is-danger" @click.prevent="deleteLink(show.id)">
-                            Xác nhận
-                          </button>
-                        </div>
-                        <div class="control">
-                          <button class="button" @click.prevent="offModelDeleteLink">CLOSE</button>
-                        </div>
+                      <div class="control">
+                        <button class="button" @click.prevent="offModelDeleteLink">CLOSE</button>
                       </div>
                     </div>
                   </div>
-                  <button
-                    class="modal-close is-large"
-                    aria-label="close"
-                    @click.prevent="offModelDeleteLink"
-                  ></button>
-                
+                </div>
+                <button
+                  class="modal-close is-large"
+                  aria-label="close"
+                  @click.prevent="offModelDeleteLink"
+                ></button>
               </div>
-              
+
               <button class="button is-link is-light" style="margin-left: 3%">
                 <Router-link :to="{ path: '/user/update/' + uid + '/' + show.id }">
                   edit
                 </Router-link>
               </button>
+
               <button
                 class="button is-primary"
                 style="margin-left: 3%"
@@ -214,12 +216,11 @@ const emailVerifiedUser = ref(false)
 const statusModal = ref(false)
 const statusModalDeleteLink = ref(false)
 const pC = ref('')
-
 const ThisUserPassCodeID = ref('')
 const passCodeOnFireBase = ref('')
 const statusPassCode = ref(false)
-// const statusModalPassCode = ref('')
 const date = serverTimestamp()
+const saveIdDeleteLink = ref('')
 
 onMounted(async () => {
   let arrData: ShowData[] = []
@@ -299,7 +300,7 @@ onMounted(async () => {
           )
         }
 
-        const linkKnow = '/' + user.uid
+        const linkKnow = '/home/' + user.uid
         return routerVue.push(linkKnow).then(() => {
           location.href = linkKnow
         })
@@ -314,10 +315,15 @@ onMounted(async () => {
   })
 })
 
-async function deleteLink(id: string) {
-  await deleteDoc(doc(db, 'data', id))
-  location.reload()
+async function run(id: string) {
+  onModelDeleteLink();
+  saveIdDeleteLink.value = id
 }
+async function deleteLink(id: string) {
+    await deleteDoc(doc(db, 'data', id))
+    location.reload()
+}
+
 
 //{ modal
 const onModalPassCode = () => {
@@ -328,28 +334,17 @@ const offModalPassCode = () => {
   statusModal.value = false // Hàm để đóng modal khi cần thiết
 }
 
-const onModelDeleteLink = () =>{
+const onModelDeleteLink =  ()  => {
   statusModalDeleteLink.value = true
 }
 
-const offModelDeleteLink = () =>{
+const offModelDeleteLink = () => {
   statusModalDeleteLink.value = false
 }
 const alertnotification1 = () => {
   return routerVue.push('/user/userInfo/' + uid)
 }
 
-// const alertnotification = () => {
-//   const statusAlert = confirm(
-//     'Bạn chưa kích hoạt PassCode vui lòng nhấn ok để vào phần cài đặt để bật PassCode'
-//   )
-
-//   if (statusAlert == true) {
-//     return routerVue.push('/user/userInfo/' + uid)
-//   } else {
-//     offModalPassCode()
-//   }
-// }
 //truy vấn trạng thái Pass code bật hay tắt trên firebase từ collection passCode
 onAuthStateChanged(Auth1, async (user) => {
   const q = query(collection(db, 'passCode'), where('uid', '==', user?.uid))
@@ -362,7 +357,7 @@ onAuthStateChanged(Auth1, async (user) => {
       passCodeOnFireBase.value = doc.data().pC
       ThisUserPassCodeID.value = doc.id
     })
-  } 
+  }
 })
 
 async function accessPrivacySpace() {

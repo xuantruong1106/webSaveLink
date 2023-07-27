@@ -98,7 +98,7 @@ function signInWithGoogle() {
       const token = credential?.accessToken // Add null check using optional chaining
       const user = result.user
       router.push({
-        path: '/' + user.uid
+        path: '/home/' + user.uid
       })
     })
     .catch((error) => {
@@ -143,7 +143,7 @@ const signIn = async () => {
           .then(() => {
             console.log('Email verification sent')
             return router.push({
-              path: '/' + user.uid
+              path: '/home/' + user.uid
             })
           })
           .catch((error) => {

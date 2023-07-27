@@ -7,7 +7,7 @@
       </button>
     </div>
     <div class="column is-offset-11" v-if="emailVerified == false">
-      <p>Vui lòng xác nhận email để dùng được các tính năng của trang web</p>
+      <p>Please confirm your email to use the site's features</p>
     </div>
   </div>
   <div class="table-container">
@@ -60,7 +60,34 @@
                   </div>
                 </article>
               </div>
-              <button class="button is-danger" @click="deleteLink(show.id)">delete</button>
+              <button class="button is-danger" @click.prevent="run(show.id)">delete</button>
+              <div
+                class="modal"
+                :class="{ 'is-active': statusModalDeleteLink }"
+                v-if="statusModalDeleteLink == true"
+              >
+                <div class="modal-background"></div>
+                <div class="modal-content">
+                  <div class="box">
+                    <div class="field">
+                      <label class="notification label is-danger">CONFIRM DELETE LINK</label>
+                    </div>
+                    <div class="field is-grouped">
+                      <div class="control">
+                        <button class="button is-danger" @click.prevent="deleteLink(saveIdDeleteLink)">Confirm</button>
+                      </div>
+                      <div class="control">
+                        <button class="button" @click.prevent="offModelDeleteLink">CLOSE</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  class="modal-close is-large"
+                  aria-label="close"
+                  @click.prevent="offModelDeleteLink"
+                ></button>
+              </div>
               <button class="button is-link is-light" style="margin-left: 3%">
                 <Router-link :to="{ path: '/user/update/needPass/' + uid + '/' + show.id }">
                   edit
@@ -92,13 +119,14 @@ interface ShowData {
   month?: number
   year?: number
 }
-
+const statusModalDeleteLink = ref(false)
 let showDataDetail = ref<ShowData[]>([])
 const routeVue = useRoute()
 const uid = routeVue.params.uid
 const routerVue = useRouter()
 const emailVerified = ref(false)
 const date = serverTimestamp()
+const saveIdDeleteLink = ref('')
 console.log(emailVerified)
 onMounted(async () => {
   let arrData: ShowData[] = []
@@ -184,7 +212,7 @@ onMounted(async () => {
           )
         }
 
-        const linkKnow = '/' + user.uid
+        const linkKnow = '/home/' + user.uid
         return routerVue.push(linkKnow).then(() => {
           location.href = linkKnow
         })
@@ -198,7 +226,18 @@ onMounted(async () => {
     }
   })
 })
+const onModelDeleteLink =  ()  => {
+  statusModalDeleteLink.value = true
+}
 
+const offModelDeleteLink = () => {
+  statusModalDeleteLink.value = false
+}
+
+async function run(id: string) {
+  onModelDeleteLink();
+  saveIdDeleteLink.value = id
+}
 const deleteLink = async (id: string) => {
   await deleteDoc(doc(db, 'dataNeedPassCode', id))
   location.reload()

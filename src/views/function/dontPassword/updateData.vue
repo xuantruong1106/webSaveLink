@@ -80,7 +80,7 @@ const updateLink = async () => {
   
   // console.log(title.value+ '/' + describe.value + '/'+ link.value + '/' +'Update done')
 
-  return routerVue.push({ path: '/' + uid })
+  return routerVue.push({ path: '/home/' + uid })
 }
 </script>
 

@@ -38,7 +38,7 @@
   
   onAuthStateChanged(Auth1, (user) => {
     if (!user) {
-      // Người dùng đã đăng nhập
+      // Người dùng chưa đăng nhập
       router.push({
         path: '/'
       })

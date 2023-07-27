@@ -35,9 +35,10 @@ const title = ref('')
 const describe = ref('')
 const date = serverTimestamp()
 
+console.log(uid)
 onAuthStateChanged(Auth1, (user) => {
   if (!user) {
-    // Người dùng đã đăng nhập
+    // Người dùng chưa đã đăng nhập
     router.push({
       path: '/'
     })
@@ -58,7 +59,7 @@ const handleSubmitAddLink = async () => {
   console.log('add link Successfully!')
 
   return router.push({
-    path: '/' + uid
+    path: '/home/' + uid
   })
 }
 </script>

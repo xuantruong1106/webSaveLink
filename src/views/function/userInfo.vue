@@ -64,8 +64,8 @@
         <div>
           <span v-if="!statusPassCode" class="alert">{{
             statusPassCode
-              ? 'Bạn đã bật PASSCODE tính năng lưu cần mật khẩu đã bật'
-              : 'Bạn chưa bật PASSCODE tính năng lưu cần mật khẩu bị tắt'
+              ? 'You have enabled the feature save need password'
+              : 'You have not enabled the feature save need password'
           }}</span>
         </div>
 
@@ -79,7 +79,7 @@
           <div class="modal-content">
             <div class="box">
               <div class="field">
-                <label class="label">Thiết lập Passcode:</label>
+                <label class="label">Set up passcode</label>
                 <div class="control">
                   <input
                     class="input"
@@ -91,10 +91,10 @@
               </div>
               <div class="field is-grouped">
                 <div class="control">
-                  <button class="button is-primary" @click="onPassCode">Xác nhận</button>
+                  <button class="button is-primary" @click="onPassCode">Confirm</button>
                 </div>
                 <div class="control">
-                  <button class="button" @click="closepassCodeModal">Hủy</button>
+                  <button class="button" @click="closepassCodeModal">Canel</button>
                 </div>
               </div>
             </div>
@@ -117,7 +117,7 @@
           <div class="modal-content">
             <div class="box">
               <div class="field">
-                <label class="label">Bật lại Passcode:</label>
+                <label class="label">Re-enable the passcode</label>
                 <div class="control">
                   <input
                     class="input"
@@ -129,10 +129,10 @@
               </div>
               <div class="field is-grouped">
                 <div class="control">
-                  <button class="button is-primary" @click="onAgainPassCode">Xác nhận</button>
+                  <button class="button is-primary" @click="onAgainPassCode">Confirm</button>
                 </div>
                 <div class="control">
-                  <button class="button" @click="closepassCodeModal">Hủy</button>
+                  <button class="button" @click="closepassCodeModal">Canel</button>
                 </div>
               </div>
             </div>
@@ -150,7 +150,7 @@
           <div class="modal-content">
             <div class="box">
               <div class="field">
-                <label class="label">Nhập Passcode để tắt tính năng:</label>
+                <label class="label">Turn off passcode</label>
                 <div class="control">
                   <input
                     class="input"
@@ -162,19 +162,14 @@
               </div>
               <div class="field is-grouped">
                 <div class="control">
-                  <button class="button is-primary" @click="offPassCode()">Xác nhận</button>
+                  <button class="button is-primary" @click="offPassCode()">Confirm</button>
                 </div>
                 <div class="control">
-                  <button class="button" @click="closepassCodeModal">Hủy</button>
+                  <button class="button" @click="closepassCodeModal">Canel</button>
                 </div>
               </div>
             </div>
           </div>
-          <button
-            class="modal-close is-large"
-            aria-label="close"
-            @click="closepassCodeModal"
-          ></button>
         </div>
       </div>
     </div>
@@ -182,9 +177,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { db, Auth1, storage } from '../../configs/firebase'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import {
   onAuthStateChanged,
   updateProfile,
@@ -245,6 +240,7 @@ onAuthStateChanged(Auth1, (user) => {
     })
   } else {
     //hiển thị thông tin của user
+
     showStatusEmailVerified.value = Auth1.currentUser?.emailVerified || false
     usesrStatus.value = true
     fullName.value = user.displayName ?? ''
@@ -415,7 +411,7 @@ onAuthStateChanged(Auth1, async (user) => {
     firstOnPassCode.value = 0
     console.log('người dùng chưa bật passCode')
 
-    statusPassCode.value = false;
+    statusPassCode.value = false
   }
 })
 
@@ -460,15 +456,6 @@ async function onAgainPassCode() {
     reloadWebsite()
   }
 }
-
-//gọi modal
-function modelPassCode() {
-  openpassCodeModal()
- 
-    onPassCode()
-  
-}
-//}
 </script>
 
 <style scoped>

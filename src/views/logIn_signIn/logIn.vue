@@ -75,7 +75,7 @@ onAuthStateChanged(Auth1, (user) => {
     // Người dùng đã đăng nhập
 
     router.push({
-      path: '/' + user.uid
+      path: '/home/' + user.uid
     })
 
     console.log(user.uid)
@@ -109,7 +109,7 @@ function signInWithGoogle() {
       const token = credential?.accessToken // Add null check using optional chaining
       const user = result.user
       router.push({
-        path: '/' + user.uid
+        path: '/home/' + user.uid
       })
     })
     .catch((error) => {
@@ -128,7 +128,7 @@ async function handleSubmit() {
     console.log('done')
 
     router.push({
-      path: '/' + user.uid
+      path: '/home/' + user.uid
     })
 
     email.value = ''

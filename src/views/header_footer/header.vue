@@ -16,7 +16,7 @@
     <div class="navbar-menu is-flex">
       <div class="navbar-start">
         <a class="navbar-item">
-          <RouterLink :to="{ path: '/' + uid }">Home</RouterLink>
+          <RouterLink :to="{ path: '/home/' + uid }">Home</RouterLink>
         </a>
       </div>
 
